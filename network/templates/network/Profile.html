@@ -1,0 +1,76 @@
+{% extends "network/layout.html" %}
+
+{% block body %}
+
+    <div style="text-align: center" class=" py-4 shadow shadow-md my-3">
+        <h3>{{userprofile.USERNAME}}</h3>
+        <h6>{{userprofile.FOLLOWERS.count}} Follower </h6>
+        <h6>{{userprofile.FOLLOWING.count}} Following</h6>
+        {% if userr2 != userr %}
+            <form class="followunfollow" method="POST" action="/Profile/{{userprofile.USERNAME}}">
+                {% csrf_token %}
+                {% if request.user in profilefollowers %}
+                    <input name="unfollow" class="btn btn-dark btn-sm" type="submit" value="Unfollow">
+                {% else %}
+                    <input name="follow" class="btn btn-dark btn-sm" type="submit" value="Follow">
+                {% endif %}
+            </form>
+        {% else %}
+            Welcome {{userr}}
+        {% endif %}
+    </div>
+
+    <div class="postbody  my-5 shadow shadow-md">
+            <div class=" my-3" >
+                    {% for post in page_obj %}
+                        <div class="postss p-4 my-4 border shadow shadow-md">
+                            <p style="display: none" id="user-{{post.id}}">{{logged}}</p>
+                            {% if request.user.is_authenticated %}
+                                <a href="/Profile/{{post.USERNAME}}">{{post.USERNAME}}</a> <span class=" spantimestamp ms-4"> {{post.TIMESTAMP}}</span>
+                            {% else %}
+                                {{post.USERNAME}} <span class="ms-4"> {{post.TIMESTAMP}}</span>
+                            {% endif %}
+                            <div id="post-{{post.id}}" class="my-2 mt-0">
+                                    <h5 id="inpost-{{post.id}}">{{post.POST}}</h5>
+                            </div>
+
+                            <div id="form-{{post.id}}" class="editform">
+                                <textarea autofocus class="form-control" name="" id="text-{{post.id}}" cols="30" rows="10">{{post.POST}}</textarea>
+                                <button data-id="{{post.id}}" id="save-{{post.id}}" class=" save btn btn-dark"> save</button>
+                            </div>
+                            
+                            <div  id="like-{{post.id}}" data-id="{{post.id}}" class="ffa bi {% if request.user in post.LIKES.all %}bi-heart-fill {% else %}bi-heart {% endif %}">
+                                    <small id="count-{{post.id}}">{{post.LIKES.count}}</small>
+                            </div> 
+                            <div class="mt-2">
+                                {% if request.user == post.USERNAME %}
+                                    <button data-id="{{post.id}}" id="btn-{{post.id}}" class=" edit btn btn-dark btn-sm">Edit Post</button>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                    {% empty %}
+                        <p>No post</p>
+                    {% endfor %}
+            </div>
+    </div>
+
+    <div style="display: flex;justify-content: flex-end">
+        <nav aria-label="...">
+            <ul class="pagination">
+                {% if page_obj.has_previous %}
+                    <li class="page-item">
+                        <a  class="page-link" href="?page={{page_obj.previous_page_number}}" tabindex="-1">Previous</a>
+                    </li>
+                {% endif %}
+                <li  class="page-item"><a   class="page-link" href="?page=1">1</a></li>
+                {% if page_obj.has_next %}
+                    <li class="page-item">
+                        <a  class="page-link" href="?page={{page_obj.next_page_number}}">Next</a>
+                    </li>
+                {% endif %}
+            </ul>
+        </nav>
+    </div>
+{% endblock %}
+
